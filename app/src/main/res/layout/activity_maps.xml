@@ -5,4 +5,14 @@
     android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.alex.maps_app.MapsActivity" />
+    tools:context="com.example.alex.maps_app.MapsActivity"
+    map:cameraTargetLat="49.122488"
+    map:cameraTargetLng="9.206308"
+    map:cameraZoom="10"
+    map:mapType="normal"
+    map:uiCompass="false"
+    map:uiRotateGestures="true"
+    map:uiScrollGestures="true"
+    map:uiTiltGestures="true"
+    map:uiZoomControls="true"
+    map:uiZoomGestures="true"/>
