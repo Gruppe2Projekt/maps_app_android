@@ -1,5 +1,6 @@
 package com.example.alex.maps_app;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -12,9 +13,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 public class Drawer extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
+
+    //Mit Hilfe dieser können wir später die Position auslesen
+    GoogleApiClient mGoogleApiClient;
+
+    //Diese Variable beinhaltet später die Positionsdaten
+    Location mLastLocation;
+
+    //Variablen, zur Anzeige der Daten (nicht unbedingt relevant)
+    TextView l;
+    TextView b;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +41,16 @@ public class Drawer extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
+        //Aufruf der Initalisierung
+        buildGoogleApiClient();
+
+        //Definieren der Textausgabefelder
+        l = (TextView) findViewById(R.id.textLaengenGrad);
+        b = (TextView) findViewById(R.id.textBreitenGrad);
+
+        //Starten der eben initalisierten API von Google
+        mGoogleApiClient.connect();
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -34,6 +62,40 @@ public class Drawer extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
     }
+
+    //Initalisiert die API von Google, mit der wir die Position auslesen können
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    //Wird aufgerufen, wenn die Verbindung zur Google API erfolgreich ist
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        //Anhand der erfolgreichen Verbindung die benötigten Daten auslesen
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
+        if (mLastLocation != null) {
+            //Die ausgelesenen daten verwerten und anzeigen
+            l.setText("Längengrad: " + String.valueOf(mLastLocation.getLongitude()));
+            b.setText("Breitengrad: " + String.valueOf(mLastLocation.getLatitude()));
+        }
+    }
+
+    //Wird aufgerufen, wenn die Verbindung zur Google API aussteht
+    @Override
+    public void onConnectionSuspended(int i) {}
+
+    //Wird aufgerufen, wenn die Verbindung zur Google API fehlschlägt
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        l.setText("Längengrad: Da ist ein Fehler aufgetreten.");
+        b.setText("Breitengrad: Da ist ein Fehler aufgetreten.");
+    }
+
 
     @Override
     public void onBackPressed() {
